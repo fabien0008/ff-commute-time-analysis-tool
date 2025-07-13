@@ -1,0 +1,126 @@
+{
+  "_comment": "Example configuration file for commute time analysis tool",
+  "_comment2": "Copy this to config.json and customize for your needs",
+  
+  "api": {
+    "_comment": "Google Maps API configuration",
+    "google_maps_api_key": "YOUR_GOOGLE_MAPS_API_KEY_HERE",
+    "max_budget_eur": 20.0,
+    "cost_per_call_eur": 0.0046
+  },
+  
+  "analysis": {
+    "_comment": "Analysis parameters",
+    "grid_resolution_km": 2.0,
+    "search_radius_km": 12.0,
+    "corridor_points": 30,
+    "corridor_offsets_km": [0, -2.5, 2.5],
+    "corridor_names": ["Central", "Southern Coast", "Northern Inland"]
+  },
+  
+  "workplaces": {
+    "_comment": "Define two workplaces and commute preferences",
+    "person_a": {
+      "name": "Person A",
+      "address": "1600 Amphitheatre Parkway, Mountain View, CA, USA",
+      "transport_mode": "bicycling",
+      "max_commute_minutes": 45,
+      "emoji": "🚴",
+      "marker_color": "green",
+      "marker_icon": "bicycle"
+    },
+    "person_b": {
+      "name": "Person B", 
+      "address": "1 Hacker Way, Menlo Park, CA, USA",
+      "transport_mode": "driving",
+      "max_commute_minutes": 35,
+      "emoji": "🚗",
+      "marker_color": "red",
+      "marker_icon": "car"
+    }
+  },
+  
+  "family_scenarios": {
+    "_comment": "Different departure time scenarios for family logistics",
+    "person_a_school_drop": {
+      "description": "Person A drops off child (departs ~7:45 AM)",
+      "person_a_departure_hour": 7,
+      "person_a_departure_minute": 45,
+      "person_b_departure_hour": 8,
+      "person_b_departure_minute": 0
+    },
+    "person_b_school_drop": {
+      "description": "Person B drops off child (departs ~7:45 AM)",
+      "person_a_departure_hour": 7,
+      "person_a_departure_minute": 30,
+      "person_b_departure_hour": 7,
+      "person_b_departure_minute": 45
+    }
+  },
+  
+  "geographic_area": {
+    "_comment": "Define the geographic area for analysis",
+    "name": "San Francisco Bay Area",
+    "center_lat": 37.4419,
+    "center_lng": -122.1430,
+    "zoom_level": 10,
+    "land_polygon": [
+      "_comment": "Define polygon boundaries to exclude water areas",
+      "_comment2": "Format: [longitude, latitude] pairs",
+      [-122.5, 37.3], [-122.0, 37.3], [-122.0, 37.6], [-122.5, 37.6], [-122.5, 37.3]
+    ],
+    "area_names": {
+      "_comment": "Named areas for zone identification",
+      "Palo Alto": [37.4419, -122.1430],
+      "Mountain View": [37.3861, -122.0839],
+      "Menlo Park": [37.4530, -122.1817],
+      "San Jose": [37.3382, -121.8863],
+      "San Francisco": [37.7749, -122.4194]
+    }
+  },
+  
+  "scheduling": {
+    "_comment": "Simulation date selection parameters",
+    "simulation_year": 2025,
+    "target_months": [10, 11, 9, 5],
+    "target_weekdays": [0, 1],
+    "num_simulation_dates": 2
+  },
+  
+  "clustering": {
+    "_comment": "DBSCAN clustering parameters for zone identification",
+    "dbscan_eps_km": 3.0,
+    "dbscan_min_samples": 2,
+    "max_zones_to_analyze": 2
+  },
+  
+  "caching": {
+    "_comment": "Cache configuration for API response storage",
+    "cache_directory": ".commute_cache",
+    "geocoding_cache_file": "geocoding.json",
+    "distance_cache_file": "distance.json"
+  },
+  
+  "output": {
+    "_comment": "Output file configuration",
+    "html_map_prefix": "commute_analysis",
+    "csv_results_file": "viable_locations.csv",
+    "map_legend_width_px": 340
+  },
+  
+  "compromise_scoring": {
+    "_comment": "Compromise score calculation and visualization",
+    "person_a_penalty_weight": 1.5,
+    "person_b_penalty_weight": 2.0,
+    "color_scheme": {
+      "perfect": "#28a745",
+      "good": "#fdbe41", 
+      "medium": "#ff7700",
+      "poor": "#dc3545"
+    },
+    "score_thresholds": {
+      "good_max": 10,
+      "medium_max": 25
+    }
+  }
+}

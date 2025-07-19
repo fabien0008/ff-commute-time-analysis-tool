@@ -1,279 +1,93 @@
-# Advanced Commute Time Analysis Tool
+Advanced Commute Time Analysis Tool (Hybrid Intelligence Version)
 
-A sophisticated tool for analyzing optimal residential locations based on commute times to multiple workplaces. Originally designed for finding the perfect home location on the French Riviera, but configurable for any geographic region.
+A sophisticated tool for analyzing optimal residential locations based on commute times. This enhanced version uses a Hybrid Traffic Intelligence System, combining the power of Google Maps traffic data with the speed and cost-effectiveness of a self-hosted OSRM (Open Source Routing Machine) server.
 
-## ✨ Features
+This approach reduces API costs by over 90% while maintaining high accuracy for peak-hour commute analysis.
 
-- **🗺️ Geographic Land Filter**: Uses point-in-polygon algorithm to ensure analyzed points are on land
-- **🎨 Rich Interactive Visualization**: Color-coded maps with compromise scores and detailed legends
-- **🔄 Multi-Corridor Seeding**: Scans multiple parallel corridors for diverse solution discovery
-- **📅 Multi-Day Comparison**: Runs analysis across different peak-hour days for comprehensive results
-- **💰 Smart Caching**: Reduces Google Maps API costs through intelligent result caching
-- **⚙️ Fully Configurable**: JSON-based configuration for any geographic region and commute scenario
+✨ Features
 
-## 🚀 Quick Start
+    Hybrid Traffic Intelligence: Samples real-world traffic patterns and applies them to a free, local routing engine. 
 
-### 1. Prerequisites
+💰 90%+ Cost Reduction: Drastically cuts Google Maps API costs by replacing per-query calls with periodic, strategic sampling. 
 
-- Python 3.7+
-- Google Maps API key with Distance Matrix API enabled
-- Required Python packages (see `requirements.txt`)
+🚀 High-Performance Routing: Leverages the speed of OSRM for analyzing hundreds of points in seconds. 
 
-### 2. Installation
+Smart Calibration: Automatically calibrates OSRM's baseline against Google's off-peak data to ensure accuracy. 
 
-```bash
-# Clone or download the repository
-git clone https://github.com/your-username/commute-time-analysis-tool.git
-cd commute-time-analysis-tool
+Fully Automated Setup: Helper scripts guide you through setting up the intelligence system and the OSRM server. 
 
-# Install dependencies
+🔧 Full Setup and Usage: A Step-by-Step Guide
+
+Follow these steps to get the complete system running from scratch.
+
+Step 1: Prerequisites
+
+    Python 3.8+
+
+    Docker: Required for running the OSRM server. Install it from the official Docker website.
+
+    Google Maps API Key: You need a key with the Distance Matrix API and Geocoding API enabled.
+
+Step 2: Install Dependencies
+
+Install the required Python packages.
+Bash
+
 pip install -r requirements.txt
-```
 
-### 3. Configuration
+Step 3: Create and Edit Configuration
 
-1. **Get Google Maps API Key**:
-   - Visit [Google Cloud Console](https://console.cloud.google.com/)
-   - Enable Distance Matrix API and Geocoding API
-   - Create an API key
+Create your config.json file. You can copy config-example.json to get started. The only essential change is adding your Google API key.
+Bash
 
-2. **Configure the tool**:
-   ```bash
-   # Edit the configuration file
-   nano config.json
-   ```
-   
-   Update the following essential fields:
-   ```json
-   {
-     "api": {
-       "google_maps_api_key": "YOUR_ACTUAL_API_KEY_HERE"
-     },
-     "workplaces": {
-       "person_a": {
-         "address": "Your first workplace address",
-         "transport_mode": "bicycling",
-         "max_commute_minutes": 45
-       },
-       "person_b": {
-         "address": "Your second workplace address", 
-         "transport_mode": "driving",
-         "max_commute_minutes": 35
-       }
-     }
-   }
-   ```
+cp config-example.json config.json
+nano config.json
 
-### 4. Run Analysis
+Step 4: Download OpenStreetMap Data
 
-```bash
-# Basic run
-python3 commute_analyzer.py
+The local routing engine needs map data.
 
-# Or use the quick start script
-chmod +x runme.sh
-./runme.sh
+    Download the file: Go to Geofabrik for your region (e.g., Europe -> France -> Provence-Alpes-Côte d'Azur).
 
-# Advanced options
-python3 commute_analyzer.py --scenario person_b_school_drop --clear-cache
-```
+    Save the file: Place the downloaded .osm.pbf file into your project's root directory (e.g., provence-alpes-cote-d-azur-latest.osm.pbf).
 
-## 📊 Output
+Step 5: Build the Traffic Intelligence Cache (One-Time Cost)
 
-The tool generates:
+This step makes a small number of calls to the Google API to learn about traffic patterns in your area. This will have a small one-time cost.
+Bash
 
-- **📍 Interactive HTML Map**: Visual analysis with color-coded compromise scores
-- **📈 CSV Data File**: Viable locations with detailed metrics
-- **💾 Cached Results**: Saved API responses for future runs
+# Check the estimated cost first (optional, free)
+python3 hybrid_commute_analyzer.py --estimate-cost
 
-Example output:
-```
-🎉 COMPARATIVE ANALYSIS COMPLETED 🎉
-📊 GLOBAL SUMMARY:
-   • ⏱️ Duration: 12.3 min | 💰 Cost: ~€4.50 | 📞 API calls: 1,247
-🔍 RESULTS BY SIMULATION DATE:
-   • 2025-10-01: 23 viable points found out of 456 analyzed
-📁 RESULT FILES:
-   • 🗺️ Interactive map: ./commute_analysis_1642358190.html
-   • 📈 CSV data (viable points): ./viable_locations.csv
-```
+# Run the setup to build the cache
+python3 hybrid_commute_analyzer.py --setup-system
 
-## ⚙️ Configuration Guide
+Step 6: Build the OSRM Routing Data (Free)
 
-### Geographic Area Setup
+This step uses your generated traffic profiles to process the map data.
+Bash
 
-For regions outside the French Riviera, update the `geographic_area` section:
+# Make the script executable
+chmod +x setup_osrm.sh
 
-```json
-{
-  "geographic_area": {
-    "name": "Your Region Name",
-    "center_lat": 40.7128,
-    "center_lng": -74.0060,
-    "zoom_level": 11,
-    "land_polygon": [
-      [lng1, lat1], [lng2, lat2], [lng3, lat3], ...
-    ],
-    "area_names": {
-      "Downtown": [40.7128, -74.0060],
-      "Brooklyn": [40.6782, -73.9442]
-    }
-  }
-}
-```
+# Run the build process for the "morning_rush" profile
+./setup_osrm.sh provence-alpes-cote-d-azur-latest.osm.pbf morning_rush
 
-### Transport Modes
+Step 7: Run the OSRM Server (Free)
 
-Supported Google Maps transport modes:
-- `"driving"`: Car with real-time traffic
-- `"bicycling"`: Bicycle routes
-- `"walking"`: Pedestrian paths
-- `"transit"`: Public transportation
+The previous step will output a docker run... command. Run this command in a new terminal.
+Bash
 
-### Advanced Parameters
+# This starts the routing server and will occupy the terminal
+docker run -t -i -p 5000:5000 -v "$(pwd):/data" osrm/osrm-backend osrm-routed --algorithm mld /data/provence-alpes-cote-d-azur-latest.osrm
 
-```json
-{
-  "analysis": {
-    "grid_resolution_km": 2.0,        // Analysis grid density
-    "search_radius_km": 12.0,         // Search area radius
-    "corridor_points": 30,            // Points per corridor scan
-    "corridor_offsets_km": [0, -2.5, 2.5]  // Parallel corridor offsets
-  },
-  "clustering": {
-    "dbscan_eps_km": 3.0,            // Clustering distance threshold
-    "dbscan_min_samples": 2,         // Minimum cluster size
-    "max_zones_to_analyze": 2        // Top zones for detailed analysis
-  }
-}
-```
+Leave this terminal running. Your local server is now active.
 
-## 💰 Cost Management
+Step 8: Run the Final Analysis (Free)
 
-Google Maps API pricing (as of 2024):
-- Distance Matrix: ~$0.005 per element
-- Geocoding: ~$0.005 per request
+Go back to your original terminal. You can now run the analysis as many times as you like with zero API cost.
+Bash
 
-Cost control features:
-- **Smart Caching**: Saves previous API responses
-- **Budget Limits**: Set maximum spending per analysis
-- **Progressive Analysis**: Focuses on promising areas first
+python3 hybrid_commute_analyzer.py
 
-Typical costs:
-- Small analysis (~500 points): €2-4
-- Large analysis (~2000 points): €8-15
-
-## 🔧 Advanced Usage
-
-### Command Line Options
-
-```bash
-# Use custom configuration file
-python3 commute_analyzer.py --config my_config.json
-
-# Select different family scenario
-python3 commute_analyzer.py --scenario person_b_school_drop
-
-# Clear cache before running
-python3 commute_analyzer.py --clear-cache
-```
-
-### Family Scenarios
-
-Define different departure time scenarios:
-
-```json
-{
-  "family_scenarios": {
-    "early_start": {
-      "description": "Early departure for both",
-      "person_a_departure_hour": 7,
-      "person_a_departure_minute": 0,
-      "person_b_departure_hour": 7,
-      "person_b_departure_minute": 15
-    }
-  }
-}
-```
-
-### Customizing Compromise Scoring
-
-Adjust penalty weights for constraint violations:
-
-```json
-{
-  "compromise_scoring": {
-    "person_a_penalty_weight": 1.5,  // Weight for person A time overruns
-    "person_b_penalty_weight": 2.0,  // Weight for person B time overruns
-    "color_scheme": {
-      "perfect": "#28a745",   // Green for perfect solutions
-      "good": "#fdbe41",      // Yellow for good compromises
-      "medium": "#ff7700",    // Orange for medium compromises
-      "poor": "#dc3545"       // Red for poor compromises
-    }
-  }
-}
-```
-
-## 🗂️ Project Structure
-
-```
-commute-time-analysis-tool/
-├── 📄 commute_analyzer.py     # Main analysis script
-├── ⚙️ config.json           # Configuration file
-├── 📋 requirements.txt      # Python dependencies
-├── 🚀 runme.sh             # Quick start script
-├── 📊 results/             # Analysis outputs
-│   ├── *.html             # Interactive maps
-│   ├── *.csv              # Data exports
-│   └── *.json             # Raw results
-└── 📚 examples/            # Alternative implementations
-    ├── pareto_optimization/ # Pareto front analysis
-    └── development_versions/ # Original versions
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and test thoroughly
-4. Commit with clear messages: `git commit -m "Add feature X"`
-5. Push and create a pull request
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**❌ "Google Maps API key not configured"**
-- Solution: Edit `config.json` and set your API key
-
-**❌ "Missing dependencies"**
-- Solution: Run `pip install -r requirements.txt`
-
-**❌ API quota exceeded**
-- Solution: Check Google Cloud Console quotas and billing
-
-**❌ No viable locations found**
-- Solution: Increase `max_commute_minutes` in config or expand `search_radius_km`
-
-### Performance Tips
-
-- Use caching to avoid repeated API calls
-- Start with larger `grid_resolution_km` (3-5km) for initial exploration
-- Reduce `corridor_points` if budget is limited
-- Clear cache if addresses change
-
-## 📄 License
-
-This project is open source. Feel free to use, modify, and distribute according to your needs.
-
-## 🙏 Acknowledgments
-
-- Google Maps Platform for routing data
-- OpenStreetMap contributors for base maps
-- scikit-learn for clustering algorithms
-- Folium for interactive visualizations
-
----
-
-**Happy house hunting! 🏡**
+The script will use your local OSRM server, apply the cached traffic intelligence, and save the output map and CSV file to the results/ directory.
